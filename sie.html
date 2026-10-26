@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CleanFlow ERP - Laundry</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--tx:#1b2638;--mut:#6b778c;--pri:#0b7a9e;--pri2:#e3f4f9;--ok:#1e9e62;--warn:#d98a00;--bad:#d64545;--bd:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx);display:flex;min-height:100vh}
+aside{width:230px;background:#0f2a3d;color:#cfe3ee;padding:18px 12px;flex-shrink:0}
+aside h1{font-size:18px;color:#fff;margin:0 8px 4px}aside small{margin:0 8px 16px;display:block;color:#7fa5ba}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;padding:10px 12px;border-radius:8px;font-size:14px;cursor:pointer;margin-bottom:2px}
+aside button:hover{background:#17405a}aside button.on{background:var(--pri);color:#fff}
+main{flex:1;padding:22px;min-width:0}
+h2{margin:0 0 16px;font-size:22px}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px}
+.card h3{margin:0 0 10px;font-size:15px}
+.kpi small{color:var(--mut)}.kpi b{display:block;font-size:24px;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px 8px;border-bottom:1px solid var(--bd);text-align:left}th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase}
+input,select{padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-size:14px;max-width:100%}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px}.btn.s{padding:4px 10px;font-size:12px}.btn.o{background:var(--pri2);color:var(--pri)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.tag{padding:3px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.t-Diterima{background:#e8eefc;color:#3558c9}.t-Dicuci{background:#fff2d9;color:var(--warn)}.t-Disetrika{background:#f1e6fb;color:#8c3fc2}.t-Siap{background:#dff5ea;color:var(--ok)}.t-Selesai{background:#eceff3;color:var(--mut)}
+.bar{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px}.bar div{flex:1;text-align:center;font-size:11px;color:var(--mut)}.bar span{display:block;background:var(--pri);border-radius:6px 6px 0 0;margin-bottom:4px}
+.low{color:var(--bad);font-weight:700}.right{text-align:right}.pos{color:var(--ok)}.neg{color:var(--bad)}
+.note{color:var(--mut);font-size:13px;margin-top:8px}
+@media(max-width:760px){body{flex-direction:column}aside{width:100%;display:flex;flex-wrap:wrap;gap:4px}aside h1,aside small{width:100%}aside button{width:auto}.card{overflow-x:auto}}
+</style>
+</head>
+<body>
+<aside>
+<h1>CleanFlow ERP</h1><small>Laundry Bersih Sejahtera</small>
+<div id="nav"></div>
+<button onclick="resetData()" style="margin-top:20px;color:#7fa5ba">Reset data demo</button>
+</aside>
+<main id="app"></main>
+<script>
+const rp=n=>'Rp'+Math.round(n).toLocaleString('id-ID');
+const today=()=>new Date().toISOString().slice(0,10);
+const SERV={'Cuci Kiloan':7000,'Cuci + Setrika':9000,'Setrika Saja':5000,'Bed Cover':35000,'Express (6 jam)':14000};
+const STAT=['Diterima','Dicuci','Disetrika','Siap','Selesai'];
+function seed(){return{
+ cust:[{id:1,nama:'Budi Santoso',hp:'0812-1111-2222',poin:42},{id:2,nama:'Siti Aminah',hp:'0813-3333-4444',poin:15},{id:3,nama:'Kost Mawar',hp:'0857-5555-6666',poin:120}],
+ orders:[{id:1001,cust:1,layanan:'Cuci + Setrika',kg:5,status:'Selesai',tgl:today(),bayar:true},{id:1002,cust:3,layanan:'Cuci Kiloan',kg:12,status:'Dicuci',tgl:today(),bayar:false},{id:1003,cust:2,layanan:'Bed Cover',kg:2,status:'Siap',tgl:today(),bayar:true}],
+ stock:[{id:1,nama:'Deterjen (kg)',qty:18,min:10,harga:22000},{id:2,nama:'Pewangi (liter)',qty:6,min:8,harga:30000},{id:3,nama:'Plastik kemasan (pak)',qty:12,min:5,harga:15000},{id:4,nama:'Pelembut (liter)',qty:9,min:6,harga:25000}],
+ purch:[{id:1,tgl:today(),item:1,qty:10,total:220000,sup:'CV Kimia Jaya'}],
+ jurnal:[{id:1,tgl:today(),ket:'Pendapatan order 1001',tipe:'Pemasukan',jml:45000},{id:2,tgl:today(),ket:'Pembelian deterjen',tipe:'Pengeluaran',jml:220000},{id:3,tgl:today(),ket:'Bayar listrik',tipe:'Pengeluaran',jml:350000},{id:4,tgl:today(),ket:'Pendapatan order 1003',tipe:'Pemasukan',jml:70000}],
+ emp:[{id:1,nama:'Rina',jabatan:'Kasir',gaji:2800000,hadir:24},{id:2,nama:'Agus',jabatan:'Operator Cuci',gaji:2600000,hadir:26},{id:3,nama:'Dewi',jabatan:'Penyetrika',gaji:2500000,hadir:22}],
+ nextOrder:1004};}
+let D;try{D=JSON.parse(localStorage.getItem('cf')||'null')}catch(e){}if(!D)D=seed();
+function save(){try{localStorage.setItem('cf',JSON.stringify(D))}catch(e){}}
+function resetData(){D=seed();save();go(cur)}
+const C=id=>(D.cust.find(c=>c.id==id)||{}).nama||'-';
+const harga=o=>(SERV[o.layanan]||0)*o.kg;
+const MENU=[['dash','Dashboard'],['jual','Penjualan'],['crm','Pelanggan (CRM)'],['inv','Inventori'],['beli','Pembelian'],['keu','Keuangan'],['sdm','SDM & Gaji']];
+let cur='dash';
+function nav(){document.getElementById('nav').innerHTML=MENU.map(m=>`<button class="${m[0]==cur?'on':''}" onclick="go('${m[0]}')">${m[1]}</button>`).join('')}
+function go(p){cur=p;nav();document.getElementById('app').innerHTML=V[p]();}
+const pemasukan=()=>D.jurnal.filter(j=>j.tipe=='Pemasukan').reduce((a,b)=>a+b.jml,0);
+const pengeluaran=()=>D.jurnal.filter(j=>j.tipe=='Pengeluaran').reduce((a,b)=>a+b.jml,0);
+const V={
+dash(){const low=D.stock.filter(s=>s.qty<s.min);const act=D.orders.filter(o=>o.status!='Selesai').length;
+ const cnt=STAT.map(s=>D.orders.filter(o=>o.status==s).length),mx=Math.max(1,...cnt);
+ return`<h2>Dashboard</h2><div class="grid g4">
+ <div class="card kpi"><small>Pemasukan</small><b class="pos">${rp(pemasukan())}</b></div>
+ <div class="card kpi"><small>Pengeluaran</small><b class="neg">${rp(pengeluaran())}</b></div>
+ <div class="card kpi"><small>Laba bersih</small><b>${rp(pemasukan()-pengeluaran())}</b></div>
+ <div class="card kpi"><small>Order aktif</small><b>${act}</b></div></div><br>
+ <div class="grid g2"><div class="card"><h3>Order per tahap proses</h3><div class="bar">${STAT.map((s,i)=>`<div><span style="height:${cnt[i]/mx*110+4}px"></span>${s}<br><b>${cnt[i]}</b></div>`).join('')}</div></div>
+ <div class="card"><h3>Peringatan stok menipis</h3>${low.length?low.map(s=>`<p class="low">${s.nama}: sisa ${s.qty} (min ${s.min})</p>`).join(''):'<p>Semua stok aman.</p>'}<p class="note">Beli di menu Pembelian untuk menambah stok otomatis.</p></div></div>`},
+jual(){return`<h2>Penjualan / Order Laundry</h2><div class="card"><h3>Order baru</h3><div class="row">
+ <select id="oc">${D.cust.map(c=>`<option value="${c.id}">${c.nama}</option>`).join('')}</select>
+ <select id="ol">${Object.keys(SERV).map(s=>`<option>${s}</option>`).join('')}</select>
+ <input id="ok" type="number" step="0.5" min="0.5" value="1" style="width:90px"> kg/pcs
+ <button class="btn" onclick="addOrder()">Buat order</button></div>
+ <p class="note">Harga dihitung otomatis dari tarif layanan. Poin loyalitas: 1 poin per Rp10.000.</p></div><br>
+ <div class="card"><table><tr><th>No</th><th>Pelanggan</th><th>Layanan</th><th>Qty</th><th>Total</th><th>Status</th><th>Bayar</th><th></th></tr>
+ ${D.orders.slice().reverse().map(o=>`<tr><td>#${o.id}</td><td>${C(o.cust)}</td><td>${o.layanan}</td><td>${o.kg}</td><td>${rp(harga(o))}</td><td><span class="tag t-${o.status}">${o.status}</span></td>
+ <td>${o.bayar?'Lunas':`<button class="btn s o" onclick="pay(${o.id})">Bayar</button>`}</td>
+ <td>${o.status!='Selesai'?`<button class="btn s" onclick="nextSt(${o.id})">Lanjut tahap</button>`:''}</td></tr>`).join('')}</table></div>`},
+crm(){return`<h2>Pelanggan (CRM)</h2><div class="card"><div class="row"><input id="cn" placeholder="Nama pelanggan"><input id="ch" placeholder="No. HP"><button class="btn" onclick="addCust()">Tambah</button></div></div><br>
+ <div class="card"><table><tr><th>Nama</th><th>HP</th><th>Total order</th><th>Total belanja</th><th>Poin</th><th>Level</th></tr>
+ ${D.cust.map(c=>{const os=D.orders.filter(o=>o.cust==c.id);const tot=os.reduce((a,o)=>a+harga(o),0);const lv=c.poin>=100?'Gold':c.poin>=40?'Silver':'Reguler';
+ return`<tr><td>${c.nama}</td><td>${c.hp}</td><td>${os.length}</td><td>${rp(tot)}</td><td>${c.poin}</td><td><span class="tag" style="background:var(--pri2);color:var(--pri)">${lv}</span></td></tr>`}).join('')}</table>
+ <p class="note">Level: Silver ≥ 40 poin, Gold ≥ 100 poin (diskon/promo khusus).</p></div>`},
+inv(){return`<h2>Inventori Bahan</h2><div class="card"><table><tr><th>Bahan</th><th>Stok</th><th>Min</th><th>Harga satuan</th><th>Nilai</th><th>Status</th></tr>
+ ${D.stock.map(s=>`<tr><td>${s.nama}</td><td class="${s.qty<s.min?'low':''}">${s.qty}</td><td>${s.min}</td><td>${rp(s.harga)}</td><td>${rp(s.qty*s.harga)}</td><td>${s.qty<s.min?'<span class="low">Perlu restock</span>':'Aman'}</td></tr>`).join('')}</table>
+ <p class="note">Stok berkurang otomatis 0,05 unit deterjen/pewangi per kg saat order dibuat.</p></div>`},
+beli(){return`<h2>Pembelian</h2><div class="card"><h3>Pembelian bahan baru</h3><div class="row">
+ <select id="pi">${D.stock.map(s=>`<option value="${s.id}">${s.nama}</option>`).join('')}</select>
+ <input id="pq" type="number" min="1" value="5" style="width:80px"><input id="ps" placeholder="Supplier" value="CV Kimia Jaya">
+ <button class="btn" onclick="addPurch()">Catat pembelian</button></div><p class="note">Otomatis menambah stok dan mencatat pengeluaran di jurnal.</p></div><br>
+ <div class="card"><table><tr><th>Tanggal</th><th>Bahan</th><th>Qty</th><th>Supplier</th><th class="right">Total</th></tr>
+ ${D.purch.slice().reverse().map(p=>`<tr><td>${p.tgl}</td><td>${(D.stock.find(s=>s.id==p.item)||{}).nama}</td><td>${p.qty}</td><td>${p.sup}</td><td class="right">${rp(p.total)}</td></tr>`).join('')}</table></div>`},
+keu(){const m=pemasukan(),k=pengeluaran();return`<h2>Keuangan & Akuntansi</h2><div class="grid g4">
+ <div class="card kpi"><small>Total pemasukan</small><b class="pos">${rp(m)}</b></div><div class="card kpi"><small>Total pengeluaran</small><b class="neg">${rp(k)}</b></div>
+ <div class="card kpi"><small>Laba / (rugi)</small><b class="${m-k>=0?'pos':'neg'}">${rp(m-k)}</b></div></div><br>
+ <div class="card"><h3>Catat transaksi manual</h3><div class="row"><input id="jk" placeholder="Keterangan"><select id="jt"><option>Pengeluaran</option><option>Pemasukan</option></select><input id="jj" type="number" placeholder="Jumlah" style="width:130px"><button class="btn" onclick="addJ()">Simpan</button></div></div><br>
+ <div class="card"><h3>Jurnal kas</h3><table><tr><th>Tgl</th><th>Keterangan</th><th>Tipe</th><th class="right">Jumlah</th></tr>
+ ${D.jurnal.slice().reverse().map(j=>`<tr><td>${j.tgl}</td><td>${j.ket}</td><td>${j.tipe}</td><td class="right ${j.tipe=='Pemasukan'?'pos':'neg'}">${rp(j.jml)}</td></tr>`).join('')}</table></div>`},
+sdm(){const tot=D.emp.reduce((a,e)=>a+gaji(e),0);return`<h2>SDM & Penggajian</h2><div class="card"><table><tr><th>Nama</th><th>Jabatan</th><th>Gaji pokok</th><th>Hadir (26 hr)</th><th>Gaji dibayar</th><th></th></tr>
+ ${D.emp.map(e=>`<tr><td>${e.nama}</td><td>${e.jabatan}</td><td>${rp(e.gaji)}</td><td>${e.hadir} <button class="btn s o" onclick="hadir(${e.id})">+1 hadir</button></td><td>${rp(gaji(e))}</td><td></td></tr>`).join('')}</table>
+ <p class="note">Gaji dibayar = gaji pokok × kehadiran / 26 hari.</p><div class="row"><b>Total gaji bulan ini: ${rp(tot)}</b><button class="btn" onclick="payroll(${tot})">Bayar gaji (catat ke jurnal)</button></div></div>`}
+};
+const gaji=e=>e.gaji*Math.min(e.hadir,26)/26;
+function addOrder(){const c=+oc.value,l=ol.value,k=+ok.value;if(!k||k<=0)return;const o={id:D.nextOrder++,cust:c,layanan:l,kg:k,status:'Diterima',tgl:today(),bayar:false};D.orders.push(o);
+ [1,2].forEach(i=>{const s=D.stock.find(x=>x.id==i);if(s)s.qty=Math.max(0,+(s.qty-0.05*k).toFixed(2))});save();go('jual')}
+function nextSt(id){const o=D.orders.find(x=>x.id==id);o.status=STAT[STAT.indexOf(o.status)+1];save();go('jual')}
+function pay(id){const o=D.orders.find(x=>x.id==id);o.bayar=true;D.jurnal.push({id:Date.now(),tgl:today(),ket:'Pendapatan order '+id,tipe:'Pemasukan',jml:harga(o)});const c=D.cust.find(x=>x.id==o.cust);c.poin+=Math.floor(harga(o)/10000);save();go('jual')}
+function addCust(){if(!cn.value.trim())return;D.cust.push({id:Date.now(),nama:cn.value.trim(),hp:ch.value,poin:0});save();go('crm')}
+function addPurch(){const s=D.stock.find(x=>x.id==pi.value),q=+pq.value;if(!q||q<=0)return;s.qty+=q;const t=q*s.harga;D.purch.push({id:Date.now(),tgl:today(),item:s.id,qty:q,total:t,sup:ps.value});D.jurnal.push({id:Date.now()+1,tgl:today(),ket:'Pembelian '+s.nama,tipe:'Pengeluaran',jml:t});save();go('beli')}
+function addJ(){if(!jk.value||!+jj.value)return;D.jurnal.push({id:Date.now(),tgl:today(),ket:jk.value,tipe:jt.value,jml:+jj.value});save();go('keu')}
+function hadir(id){const e=D.emp.find(x=>x.id==id);if(e.hadir<26)e.hadir++;save();go('sdm')}
+function payroll(t){D.jurnal.push({id:Date.now(),tgl:today(),ket:'Pembayaran gaji karyawan',tipe:'Pengeluaran',jml:t});save();go('keu')}
+nav();go('dash');
+</script>
+</body>
+</html>
